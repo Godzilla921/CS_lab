@@ -1,0 +1,86 @@
+                            | # 姓名: 金雅各		学号: 1120201316	班级: 07112002
+                            | #/* $begin ncopy-ys */
+                            | ##################################################################
+                            | # ncopy.ys - Copy a src block of len words to dst.
+                            | # Return the number of positive words (>0) contained in src.
+                            | #
+                            | # Include your name and ID here.
+                            | #
+                            | # Describe how and why you modified the baseline code.
+                            | #
+                            | ##################################################################
+                            | # Do not modify this portion
+                            | # Function prologue.
+                            | # %rdi = src, %rsi = dst, %rdx = len
+0x000:                      | ncopy:
+                            | 
+                            | ##################################################################
+                            | # You can modify this portion
+                            | 	# Loop header
+0x000: 6300                 | 	xorq %rax,%rax		# rax 统计正整数的个数
+                            | 	
+0x002: c0f2fdffffffffffffff | 	iaddq $-3, %rdx		# 得到上限 limit
+0x00c: 71cc00000000000000   | 	jle	Loop1		# 若数组长度小于4 直接进行单步循环
+0x015:                      | Loop4_4:	#4X4 循环展开
+                            | 	#1 读第一个值，写入内存并判断是否为负数
+0x015: 50a70000000000000000 | 	mrmovq 	(%rdi), %r10	# 读入第一个元素
+0x01f: 40a60000000000000000 | 	rmmovq 	%r10, (%rsi)	# 写回到dest中
+0x029: 200b                 | 	rrmovq	%rax, %r11	#
+0x02b: c0fb0100000000000000 | 	iaddq	$1, %r11	# r11 寄存器存储 rax +1 后的值，用于条件传送
+0x035: 62aa                 | 	andq 	%r10, %r10	# 
+0x037: 26b0                 | 	cmovg	%r11, %rax	# 采用条件传送指令代替条件转移指令，优化性能
+                            | 	
+                            | 	#2
+0x039: 50a70800000000000000 | 	mrmovq 	8(%rdi), %r10
+0x043: 40a60800000000000000 | 	rmmovq 	%r10, 8(%rsi)
+0x04d: 200b                 | 	rrmovq	%rax, %r11
+0x04f: c0fb0100000000000000 | 	iaddq	$1, %r11
+0x059: 62aa                 | 	andq 	%r10, %r10
+0x05b: 26b0                 | 	cmovg	%r11, %rax
+                            | 	
+                            | 	#3
+0x05d: 50a71000000000000000 | 	mrmovq 	16(%rdi), %r10
+0x067: 40a61000000000000000 | 	rmmovq 	%r10, 16(%rsi)
+0x071: 200b                 | 	rrmovq	%rax, %r11
+0x073: c0fb0100000000000000 | 	iaddq	$1, %r11
+0x07d: 62aa                 | 	andq 	%r10, %r10
+0x07f: 26b0                 | 	cmovg	%r11, %rax
+                            | 	
+                            | 	#4
+0x081: 50a71800000000000000 | 	mrmovq 	24(%rdi), %r10
+0x08b: 40a61800000000000000 | 	rmmovq 	%r10, 24(%rsi)
+0x095: 200b                 | 	rrmovq	%rax, %r11
+0x097: c0fb0100000000000000 | 	iaddq	$1, %r11
+0x0a1: 62aa                 | 	andq 	%r10, %r10
+0x0a3: 26b0                 | 	cmovg	%r11, %rax
+                            | 	
+0x0a5: c0f72000000000000000 | 	iaddq   $32, %rdi		# 更新 src 与 dest
+0x0af: c0f62000000000000000 | 	iaddq	$32, %rsi		# src 与 dest 都+4
+0x0b9: c0f2fcffffffffffffff | 	iaddq	$-4, %rdx		# 
+                            | 	
+0x0c3: 761500000000000000   | 	jg 	Loop4_4			# 大于0就继续循环
+0x0cc:                      | Loop1:
+0x0cc: c0f20300000000000000 | 	iaddq 	$3, %rdx		# 加上开头减去的3
+0x0d6: 732a01000000000000   | 	je	Done			# 若=0 则结束
+0x0df:                      | Loop:	
+                            | 
+0x0df: 50a70000000000000000 | 	mrmovq 	(%rdi), %r10
+0x0e9: 40a60000000000000000 | 	rmmovq 	%r10, (%rsi)
+0x0f3: 200b                 | 	rrmovq	%rax, %r11
+0x0f5: c0fb0100000000000000 | 	iaddq	$1, %r11
+0x0ff: 62aa                 | 	andq 	%r10, %r10
+0x101: 26b0                 | 	cmovg	%r11, %rax
+                            | 	
+0x103: c0f70800000000000000 | 	iaddq 	$8, %rdi
+0x10d: c0f60800000000000000 | 	iaddq	$8, %rsi
+0x117: c0f2ffffffffffffffff | 	iaddq	$-1, %rdx
+0x121: 76df00000000000000   | 	jg	Loop
+                            | ##################################################################
+                            | # Do not modify the following section of code
+                            | # Function epilogue.
+0x12a:                      | Done:
+0x12a: 90                   | 	ret
+                            | ##################################################################
+                            | # Keep the following label at the end of your function
+0x12b:                      | End:
+                            | #/* $end ncopy-ys */

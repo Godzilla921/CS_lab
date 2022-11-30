@@ -1,0 +1,1 @@
+/usr/bin/cc -rdynamic CMakeFiles/main.dir/signalprob.c.o CMakeFiles/main.dir/csapp.c.o -o ../../bin/main   -L/home/godzilla/Code/cs/error_control_stream/lib 

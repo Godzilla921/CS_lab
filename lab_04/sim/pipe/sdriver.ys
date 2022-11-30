@@ -1,0 +1,143 @@
+#######################################################################
+# Test for copying block of size 4;
+#######################################################################
+	.pos 0
+main:	irmovq Stack, %rsp  	# Set up stack pointer
+
+	# Set up arguments for copy function and then invoke it
+	irmovq $4, %rdx		# src and dst have 4 elements
+	irmovq dest, %rsi	# dst array
+	irmovq src, %rdi	# src array
+	call ncopy		 
+	halt			# should halt with num nonzeros in %rax
+StartFun:
+# 姓名: 金雅各		学号: 1120201316	班级: 07112002
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+#
+# Describe how and why you modified the baseline code.
+#
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+# You can modify this portion
+	# Loop header
+	xorq %rax,%rax		# rax 统计正整数的个数
+	
+	iaddq $-3, %rdx		# 得到上限 limit
+	jle	Loop1		# 若数组长度小于4 直接进行单步循环
+Loop4_4:	#4X4 循环展开
+	#1 读第一个值，写入内存并判断是否为负数
+	mrmovq 	(%rdi), %r10	# 读入第一个元素
+	rmmovq 	%r10, (%rsi)	# 写回到dest中
+	rrmovq	%rax, %r11	#
+	iaddq	$1, %r11	# r11 寄存器存储 rax +1 后的值，用于条件传送
+	andq 	%r10, %r10	# 
+	cmovg	%r11, %rax	# 采用条件传送指令代替条件转移指令，优化性能
+	
+	#2
+	mrmovq 	8(%rdi), %r10
+	rmmovq 	%r10, 8(%rsi)
+	rrmovq	%rax, %r11
+	iaddq	$1, %r11
+	andq 	%r10, %r10
+	cmovg	%r11, %rax
+	
+	#3
+	mrmovq 	16(%rdi), %r10
+	rmmovq 	%r10, 16(%rsi)
+	rrmovq	%rax, %r11
+	iaddq	$1, %r11
+	andq 	%r10, %r10
+	cmovg	%r11, %rax
+	
+	#4
+	mrmovq 	24(%rdi), %r10
+	rmmovq 	%r10, 24(%rsi)
+	rrmovq	%rax, %r11
+	iaddq	$1, %r11
+	andq 	%r10, %r10
+	cmovg	%r11, %rax
+	
+	iaddq   $32, %rdi		# 更新 src 与 dest
+	iaddq	$32, %rsi		# src 与 dest 都+4
+	iaddq	$-4, %rdx		# 
+	
+	jg 	Loop4_4			# 大于0就继续循环
+Loop1:
+	iaddq 	$3, %rdx		# 加上开头减去的3
+	je	Done			# 若=0 则结束
+Loop:	
+
+	mrmovq 	(%rdi), %r10
+	rmmovq 	%r10, (%rsi)
+	rrmovq	%rax, %r11
+	iaddq	$1, %r11
+	andq 	%r10, %r10
+	cmovg	%r11, %rax
+	
+	iaddq 	$8, %rdi
+	iaddq	$8, %rsi
+	iaddq	$-1, %rdx
+	jg	Loop
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */
+EndFun:
+
+###############################
+# Source and destination blocks 
+###############################
+	.align 8
+src:
+	.quad -1
+	.quad -2
+	.quad 3
+	.quad 4
+	.quad 0xbcdefa # This shouldn't get moved
+
+	.align 16
+Predest:
+	.quad 0xbcdefa
+dest:
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+	.quad 0xcdefab
+Postdest:
+	.quad 0xdefabc
+
+.align 8
+# Run time stack
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+	.quad 0
+
+Stack:

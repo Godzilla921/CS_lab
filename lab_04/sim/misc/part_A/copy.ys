@@ -1,0 +1,61 @@
+# 姓名: 金雅各		学号: 1120201316	班级: 07112002
+
+#  Execution begins at address 0
+.pos 0 
+	irmovq stack, %rsp		# Set up stack pointer 
+	call main		 	# Execute main program	
+	halt			# Terminal program
+
+# Sample linked list 
+.align 8 
+# Source block 
+src: 
+	.quad 0x00a 
+	.quad 0x0b0 
+	.quad 0xc00 
+# Destination block 
+dest: 
+	.quad 0x111 
+	.quad 0x222 
+	.quad 0x333
+	
+main:
+	irmovq	src, %rdi			# 设置第一个参数
+	irmovq	dest, %rsi			# 设置第二个参数
+	irmovq	$3, %rdx			# 数组中元素的个数
+	call 	copy_block		# copy_block(src, dest, 3) 
+	ret
+	
+	
+# 	copy_block(long *src, long *dest, long len)
+# 	src in %rdi, dest in %rsi, len in %rdx
+copy_block:
+	pushq %rbx			# 保存被调用者寄存器 %rbx, %r12, %r13
+	pushq %r12
+	pushq %r13
+	irmovq $8, %r12			# %r12 中存储用以更新地址的常量8
+	irmovq $1, %r13			# %r13 中存储用以更新数量的常量1
+	xorq %rax, %rax			# 返回值 result
+	andq 	%rdx, %rdx		# 判断数组的长度是否为0
+	jmp test
+loop:
+	mrmovq	(%rdi), %rbx		# cal=*src
+	rmmovq	%rbx, (%rsi)
+	addq	%r12, %rdi		# 更新src  指针  src  ++
+	addq	%r12, %rsi		# 更新dest指针  dest++
+	xorq	%rbx, %rax		# result ^=val
+	subq 	%r13, %rdx		# subq 会更新条件码，故不需要andq %rdx, %rdx
+test:
+	jne 	loop
+
+	popq 	%r13			# 寄存器恢复，与push的顺序相反
+	popq 	%r12
+	popq 	%rbx
+	ret
+
+return:
+	ret
+# Stack starts here and grows to lower addresses
+	.pos 0x200
+stack:
+	
